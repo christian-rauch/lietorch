@@ -11,20 +11,20 @@ setup(
     author="Zachary Teed",
     packages=["lietorch"],
     ext_modules=[
-        CUDAExtension("lietorch_backends", 
+        CUDAExtension("lietorch_backends",
             include_dirs=[
-                os.path.join(ROOT, "lietorch/include"), 
+                os.path.join(ROOT, "lietorch/include"),
                 os.path.join(ROOT, "eigen")],
             sources=[
-                "lietorch/src/lietorch.cpp", 
+                "lietorch/src/lietorch.cpp",
                 "lietorch/src/lietorch_gpu.cu",
                 "lietorch/src/lietorch_cpu.cpp"],
             extra_compile_args={
-                "cxx": ["-O2"], 
+                "cxx": ["-O2"],
                 "nvcc": ["-O2"],
             }),
 
-        CUDAExtension("lietorch_extras", 
+        CUDAExtension("lietorch_extras",
             sources=[
                 "lietorch/extras/altcorr_kernel.cu",
                 "lietorch/extras/corr_index_kernel.cu",
@@ -34,7 +34,7 @@ setup(
                 "lietorch/extras/extras.cpp",
             ],
             extra_compile_args={
-                "cxx": ["-O2"], 
+                "cxx": ["-O2"],
                 "nvcc": ["-O2"],
             }),
     ],

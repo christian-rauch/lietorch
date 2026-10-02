@@ -46,6 +46,3 @@ torch::Tensor as_matrix_forward_gpu(int, torch::Tensor);
 torch::Tensor jleft_forward_gpu(int, torch::Tensor, torch::Tensor);
 
 #endif
-
-
-  

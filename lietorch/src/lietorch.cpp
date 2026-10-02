@@ -155,7 +155,7 @@ std::vector<torch::Tensor> adj_backward(int group_index, torch::Tensor grad, tor
 torch::Tensor adjT(int group_index, torch::Tensor X, torch::Tensor a) {
     CHECK_CONTIGUOUS(X);
     CHECK_CONTIGUOUS(a);
-    
+
     if (X.device().type() == torch::DeviceType::CPU) {
         return adjT_forward_cpu(group_index, X, a);
 
@@ -170,7 +170,7 @@ std::vector<torch::Tensor> adjT_backward(int group_index, torch::Tensor grad, to
     CHECK_CONTIGUOUS(X);
     CHECK_CONTIGUOUS(a);
     CHECK_CONTIGUOUS(grad);
-    
+
     if (X.device().type() == torch::DeviceType::CPU) {
         return adjT_backward_cpu(group_index, grad, X, a);
 
@@ -214,7 +214,7 @@ std::vector<torch::Tensor> act_backward(int group_index, torch::Tensor grad, tor
 torch::Tensor act4(int group_index, torch::Tensor X, torch::Tensor p) {
     CHECK_CONTIGUOUS(X);
     CHECK_CONTIGUOUS(p);
-    
+
     if (X.device().type() == torch::DeviceType::CPU) {
         return act4_forward_cpu(group_index, X, p);
 
@@ -243,7 +243,7 @@ std::vector<torch::Tensor> act4_backward(int group_index, torch::Tensor grad, to
 
 torch::Tensor projector(int group_index, torch::Tensor X) {
     CHECK_CONTIGUOUS(X);
-    
+
     if (X.device().type() == torch::DeviceType::CPU) {
         return orthogonal_projector_cpu(group_index, X);
 
@@ -257,7 +257,7 @@ torch::Tensor projector(int group_index, torch::Tensor X) {
 
 torch::Tensor as_matrix(int group_index, torch::Tensor X) {
     CHECK_CONTIGUOUS(X);
-    
+
     if (X.device().type() == torch::DeviceType::CPU) {
         return as_matrix_forward_cpu(group_index, X);
 
@@ -314,4 +314,3 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
   m.def("Jinv", &Jinv, "left inverse jacobian operator");
 
 };
-
