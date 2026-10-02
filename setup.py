@@ -41,6 +41,63 @@ sources = [
     "lietorch/src/lietorch_cpu.cpp",
 ]
 
+# Package indexes searched (in order) for rocm-sdk-devel; override with LIETORCH_ROCM_INDEX_URL.
+ROCM_INDEX_URLS = [
+    "https://repo.amd.com/rocm/whl/gfx120X-all/",
+    "https://rocm.prereleases.amd.com/whl/gfx120X-all/",
+    "https://rocm.nightlies.amd.com/v2/gfx120X-all/",
+]
+
+
+def fetch_rocm_headers():
+    """Download the rocm-sdk-devel wheel matching the installed ROCm SDK and extract only
+    the thrust/rocprim headers into build/rocm_headers (the environment is left untouched)."""
+    import tarfile
+    import tempfile
+    import zipfile
+    from importlib import metadata
+
+    target = os.path.join(ROOT, "build", "rocm_headers")
+    if os.path.isfile(os.path.join(target, "thrust", "complex.h")):
+        return target
+
+    try:
+        version = metadata.version("rocm-sdk-core")
+    except metadata.PackageNotFoundError:
+        version = torch.version.hip.split("-")[0]
+    major, minor = version.split(".")[:2]
+    spec = f">={major}.{minor}.0a0,<{major}.{int(minor) + 1}.0a0"
+    indexes = [u for u in [os.environ.get("LIETORCH_ROCM_INDEX_URL")] if u] or ROCM_INDEX_URLS
+
+    with tempfile.TemporaryDirectory() as tmp:
+        wheel = None
+        for url in indexes:
+            print(f"lietorch: downloading rocm-sdk-devel{spec} from {url}")
+            res = subprocess.run(
+                [sys.executable, "-m", "pip", "download", f"rocm-sdk-devel{spec}", "--pre",
+                 "--no-deps", "--index-url", url, "-d", tmp, "--quiet"])
+            wheel = next(iter(glob.glob(os.path.join(tmp, "rocm_sdk_devel-*.whl"))), None)
+            if res.returncode == 0 and wheel:
+                break
+        if not wheel:
+            raise RuntimeError(
+                f"ROCm build requires the thrust headers (thrust/complex.h) but rocm-sdk-devel{spec} "
+                "could not be downloaded. Install the ROCm development files matching your PyTorch "
+                "(`pip install rocm[devel]` from the same index as torch), install a system ROCm with "
+                "rocthrust, or set LIETORCH_ROCM_INDEX_URL to a package index providing rocm-sdk-devel.")
+        with zipfile.ZipFile(wheel) as z:
+            z.extract("rocm_sdk_devel/_devel.tar", tmp)
+        prefix = "_rocm_sdk_devel/include/"
+        with tarfile.open(os.path.join(tmp, "rocm_sdk_devel", "_devel.tar")) as t:
+            members = [m for m in t.getmembers()
+                       if m.name.startswith((prefix + "thrust/", prefix + "rocprim/"))]
+            for m in members:
+                m.name = m.name[len(prefix):]
+            os.makedirs(target, exist_ok=True)
+            t.extractall(target, members=members)
+    return target
+
+
 def rocm_build_paths():
     """Extra include/library dirs needed by pip-installed ROCm SDKs, which ship
     neither thrust headers (rocm-sdk-devel) nor an unversioned libamdhip64.so."""
@@ -57,10 +114,7 @@ def rocm_build_paths():
     inc = [os.path.join(r, "include") for r in roots if r]
     inc = [d for d in inc if os.path.isfile(os.path.join(d, "thrust", "complex.h"))]
     if not inc:
-        raise RuntimeError(
-            "ROCm build requires the thrust headers (thrust/complex.h). Install the ROCm "
-            "development files matching your PyTorch, e.g. `pip install rocm[devel]==<version>` "
-            "from the same index as torch, or a system ROCm with rocthrust.")
+        inc = [fetch_rocm_headers()]
     include_dirs.append(inc[0])
 
     lib_dir = os.path.join(ROCM_HOME, "lib") if ROCM_HOME else None
