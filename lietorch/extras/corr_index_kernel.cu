@@ -1,9 +1,16 @@
 #include <torch/extension.h>
+#ifdef WITH_ROCM
+#include <hip/hip_runtime.h>
+#else
 #include <cuda.h>
 #include <cuda_runtime.h>
+#endif
 #include <vector>
+#ifdef WITH_ROCM
+#include <hip/hip_fp16.h>
+#else
 #include <cuda_fp16.h>
-#include <cuda_runtime.h>
+#endif
 
 
 #include <ATen/ATen.h>

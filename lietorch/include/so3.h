@@ -2,7 +2,9 @@
 #ifndef SO3_HEADER
 #define SO3_HEADER
 
-#ifdef WITH_CUDA
+#ifdef WITH_ROCM
+#include <hip/hip_runtime.h>
+#elif defined(WITH_CUDA)
 #include <cuda.h>
 #endif
 #include <stdio.h>
