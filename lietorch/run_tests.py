@@ -276,26 +276,27 @@ if __name__ == '__main__':
         test_vec_grad(Group, device='cpu')
         test_fromvec_grad(Group, device='cpu')
 
-    print("Testing lietorch forward pass (GPU) ...")
-    for Group in [SO3, RxSO3, SE3, Sim3]:
-        test_exp_log(Group, device='cuda')
-        test_inv(Group, device='cuda')
-        test_adj(Group, device='cuda')
-        test_act(Group, device='cuda')
+    if torch.cuda.is_available():
+        print("Testing lietorch forward pass (GPU) ...")
+        for Group in [SO3, RxSO3, SE3, Sim3]:
+            test_exp_log(Group, device='cuda')
+            test_inv(Group, device='cuda')
+            test_adj(Group, device='cuda')
+            test_act(Group, device='cuda')
 
-    print("Testing lietorch backward pass (GPU)...")
-    for Group in [SO3, RxSO3, SE3, Sim3]:
-        if Group == Sim3:
-            tol = 1e-3
-        else:
-            tol = 1e-8
+        print("Testing lietorch backward pass (GPU)...")
+        for Group in [SO3, RxSO3, SE3, Sim3]:
+            if Group == Sim3:
+                tol = 1e-3
+            else:
+                tol = 1e-8
 
-        test_exp_log_grad(Group, device='cuda', tol=tol)
-        test_inv_log_grad(Group, device='cuda', tol=tol)
-        test_adj_grad(Group, device='cuda')
-        test_adjT_grad(Group, device='cuda')
-        test_act_grad(Group, device='cuda')
-        test_matrix_grad(Group, device='cuda')
-        extract_translation_grad(Group, device='cuda')
-        test_vec_grad(Group, device='cuda')
-        test_fromvec_grad(Group, device='cuda')
+            test_exp_log_grad(Group, device='cuda', tol=tol)
+            test_inv_log_grad(Group, device='cuda', tol=tol)
+            test_adj_grad(Group, device='cuda')
+            test_adjT_grad(Group, device='cuda')
+            test_act_grad(Group, device='cuda')
+            test_matrix_grad(Group, device='cuda')
+            extract_translation_grad(Group, device='cuda')
+            test_vec_grad(Group, device='cuda')
+            test_fromvec_grad(Group, device='cuda')
