@@ -2,7 +2,9 @@
 #ifndef SO3_HEADER
 #define SO3_HEADER
 
+#ifdef WITH_CUDA
 #include <cuda.h>
+#endif
 #include <stdio.h>
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
