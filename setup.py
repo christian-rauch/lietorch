@@ -3,7 +3,13 @@ import os
 import glob
 import subprocess
 import sys
-import torch
+try:
+    import torch
+except ImportError:
+    raise RuntimeError(
+        "lietorch must be built against your installed PyTorch (CUDA/ROCm/CPU build), which is not "
+        "visible in pip's isolated build environment. Install PyTorch first and rerun pip with "
+        "`--no-build-isolation`.") from None
 from torch.utils.cpp_extension import BuildExtension, CppExtension, CUDAExtension, CUDA_HOME, ROCM_HOME
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
